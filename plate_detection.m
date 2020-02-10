@@ -1,21 +1,23 @@
 function result_string =plate_detection(im)
 %Wczytujemy obraz z ktorego ma zostac wykryta tablica
+%dziala dobrze rejestracja5,6,7
 carImg = im;
+carImg = imresize(carImg,0.5);
 %Konwersja na skale szaro�ci
 carGray = rgb2gray(carImg);
 [rows , cols] = size(carGray);
 
 % Convert Image to binary Image
 % Remove all the objects containing less than 20 pixels
-imshow(carGray);
+%imshow(carGray);
 
 
 % 
 % %Operacja otwarcia na obrazie
-se = strel('disk',3);
+se = strel('disk',4);
 carGray = imopen(carGray,se);
-imshow(carGray);
-figure(1);
+%imshow(carGray);
+%figure(1);
 
 difference = 0;
 sum = 0;
@@ -34,7 +36,7 @@ for i = 2:cols
             difference = uint32(carGray(j-1,i) - carGray(j,i));
         end
         %Tutaj pozmieniac wartosc i zobaczyc jak bedzie najlepiej
-        if(difference > 20)
+        if(difference > 40)
             sum = sum + difference;
         end
     end
@@ -48,21 +50,21 @@ for i = 2:cols
 end
 avg = total_sum / cols;
 %histogram dla poziomych
-figure(2);
-plot(horizontal);
+% figure(2);
+% plot(horizontal);
 %Stosujemy filtr dolnoprzepustowy �eby wyg�adzi� histogram
 sum = 0;
 horizontal_lowpass = horizontal;
-for i = 21:(cols-21)
+for i = 41:(cols-41)
     sum=0;
-    for j = (i-20):(i+20)
+    for j = (i-40):(i+40)
         sum = sum + horizontal(j);
     end
-    horizontal_lowpass(i) = sum /41;
+    horizontal_lowpass(i) = sum /81;
 end
 %histogram po filtrze dolnoprzepustowym
-figure(3);
-plot(horizontal_lowpass);
+% figure(3);
+% plot(horizontal_lowpass);
 %dynamic tresholding
 for i = 1:cols
     if(horizontal_lowpass(i) < avg)
@@ -72,8 +74,8 @@ for i = 1:cols
         end
     end
 end
-figure(4);
-plot(horizontal_lowpass);
+% figure(4);
+% plot(horizontal_lowpass);
 %wykrywanie kraw�dzi pionowych
 difference = 0;
 total_sum = 0;
@@ -104,8 +106,8 @@ for i = 2:rows
 end
 avg = total_sum / rows;
 %histogram dla pionowych krawedzi
-figure(5);
-plot(vertical);
+% figure(5);
+% plot(vertical);
 %znowu uzywamy filtru dolnoprzepustowego
 sum = 0;
 vertical_lowpass = vertical;
@@ -125,8 +127,8 @@ for i = 1:rows
         end
     end
 end
-figure(6);
-imshow(carGray);
+% figure(6);
+% imshow(carGray);
 %Szukamy mo�liwych obszar�w dla naszej tablicy rejestracyjnej
 j = 1;
 for i = 2:cols-2
@@ -169,27 +171,27 @@ for i = 1:2:row_size
         end
     end
 end
-figure(6);
-imshow(carGray);
+% figure(6);
+% imshow(carGray);
 
-%wycinamy rejestracje tu cos nie dziala do konca :D 
-for i = 1:rows
-    for j = 1:cols
-        if( carGray(i,j) > 0)
-            x=i;
-            y=j;
-            break
-        end
-    end
+%wycinanie rejestracji
+se = strel('disk',10);
+imageToCrop = carGray;
+imageToCrop = imbinarize(imageToCrop);
+imageToCrop = imclose(imageToCrop,se);
+Iprops=regionprops(imageToCrop,'BoundingBox','Area', 'Image');
+info = regionprops(imageToCrop,'Boundingbox','Area', 'Image') ;
+maximumArea = 0;
+rectangleBox = [0, 0, 0, 0];
+for k = 1 : length(Iprops)
+     BB = info(k).Area;
+     BP = info(k).BoundingBox;
+     if maximumArea < BB
+         maximumArea = BB;
+         rectangleBox =[BP(1),BP(2),BP(3),BP(4)];
+     end
 end
-rowCropped = find(any(carGray,1));
-columnCropped = find(any(carGray,2));
-rowCropped = size(rowCropped);
-columnCropped = size(columnCropped);
-size_rowCropped=rowCropped(2);
-size_columnCropped = columnCropped(1);
-croppedImage = imcrop(carGray,[size_rowCropped, x-size_columnCropped, y, size_columnCropped]);
-figure(9), imshow(croppedImage);
+croppedImage = imcrop(carGray,rectangleBox);
 
 
 %template matching
@@ -198,7 +200,7 @@ test = croppedImage;
 test = ~imbinarize(test);
 [h, w] = size(test);
 
-imshow(test);
+% imshow(test);
 
 Iprops=regionprops(test,'BoundingBox','Area', 'Image'); %Szukamy boundingboxow dla znakow rejestracji
 count = numel(Iprops);
@@ -209,11 +211,11 @@ info = regionprops(img2,'Boundingbox','Area', 'Image') ;
 %Bounding boxy (mniejsze niz np 1/7 szerokosci i wieksze niz 1/2 albo 1/3 wysokosci)
 %zeby lapalo tylko znaki a nie reszte
 %wybrane bounding boxy przyrownujemy do naszych szablonow
-imshow(img2)
-hold on
+% imshow(img2)
+% hold on
 for k = 1 : length(info)
      BB = info(k).BoundingBox;
-     rectangle('Position', [BB(1),BB(2),BB(3),BB(4)],'EdgeColor','r','LineWidth',2);
+%      rectangle('Position', [BB(1),BB(2),BB(3),BB(4)],'EdgeColor','r','LineWidth',2);
 end
 
 
