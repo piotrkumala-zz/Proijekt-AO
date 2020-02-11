@@ -2,6 +2,10 @@
 
 ### Dokumentacja projektu na przedmiot Analiza Obrazów ###
 
+**Kamil Gwiżdż**  
+**Piotr Kumala**  
+**Patryk Chodur**
+
 ## 1. Założenia projektu ##
 
 Założeniem projektu jest stworzenie działającego programu umożliwiającego
@@ -35,6 +39,23 @@ obrazie sprawdza pokrycie z każdym z szablonów. Następnie jeśli pokrycie
 będzie wynosić więcej, niż ustalony próg, program stwierdzi obecność danego
 znaku na zdjęciu.
 
+Najpierw obraz jest przekształcany do skali szarości. Następnie dokonywane
+jest otwarcie obrazu, aby wyeliminować część zakłóceń z obrazu.
+
+![Screen 2](photos/screen2.png)
+
+Teraz miejsce ma wykrywanie krawędzi poziomych i pionowych, w celu
+znalezienia obszaru zajmowanego przez tablicę rejestracyjną.
+
+![Screen 3](photos/screen3.png)
+
+Na obszarze tym dokonywany jest template matching w celu zidentyfikowania
+poszczególnych liter oraz cyfr na rejestracji.
+
+![Screen 4](photos/screen4.png)
+
+Z otrzymanych liter jest tworzony numer rejestracyjny pojazdu.
+
 ## 4. Wady projektu ##
 
 Detekcja nie działa idealnie. Dla przykładu `0` może zostać zaklasyfikowane
@@ -47,3 +68,10 @@ Jednym z pomysłów jest, aby wykorzystać sieć neuronową do określania progu
 użytego przy wykrywaniu liter. Ponadto aplikacja nie jest w stanie poprawnie
 wykryć rejestracji z pochylonego zdjęcia. Z uwagi na sesję plany te zostały
 przełożone na nieokreśloną przyszłość.
+
+## 6. Podział obowiązków ##
+
+**Wykrywanie krawędzi** - Kamil Gwiżdż, Piotr Kumala  
+**Template matching** - Kamil Gwiżdż, Patryk Chodur  
+**GUI oraz schemat projektu** - Piotr Kumala  
+**Dokumentacja** - Patryk Chodur
